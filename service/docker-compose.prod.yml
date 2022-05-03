@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  backend:
+    container_name: ms_django_2
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: "python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - 8001:8000
+    volumes:
+      - .:/app
+    depends_on:
+      - ms_django_2_mysql
+
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ms_django_2_queue
+    command: "python consumer.py"
+    depends_on:
+      - backend
+      - ms_django_2_mysql

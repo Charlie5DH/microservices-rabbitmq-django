@@ -1,0 +1,4 @@
+myenv/
+db/
+node_modules/
+docker-conf/

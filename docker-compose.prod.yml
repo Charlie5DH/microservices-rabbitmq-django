@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  queue:
+    build:
+      context: ./service
+      dockerfile: Dockerfile
+    container_name: ms_django_2_queue
+    command: "python consumer.py"
+    depends_on:
+      - ms_django_2
+      - ms_django_2_mysql
+      - rabbitmq
+    networks:
+      - rabbitmq_network

@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  backend:
+    container_name: ms_flask
+    build: .
+    ports:
+      - 8001:5000
+    volumes:
+      - .:/app
+
+  db:
+    image: mysql:5.7
+    container_name: ms_flask_mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: "main"
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_USER: "root"
+      MYSQL_PASSWORD: "root"
+    volumes:
+      - ./db/data:/var/lib/mysql
+    ports:
+      - 3307:3306
+      ## not the same because it can conflic with a defaul mysql install

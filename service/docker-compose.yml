@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  ms_django_2_mysql:
+    image: mysql:5.7
+    container_name: ms_django_2_mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: "ms_django"
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "root"
+    volumes:
+      - ./db/data:/var/lib/mysql
+    ports:
+      - 3307:3306
+      ## not the same because it can conflic with a defaul mysql install

@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  ms_django_mysql:
+    image: mysql:5.7
+    container_name: ms_django_mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: "ms_django"
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "root"
+    volumes:
+      - ./db/data:/var/lib/mysql
+    ports:
+      - 3306:3306
+      ## not the same because it can conflic with a defaul mysql install
+    networks:
+      - rabbitmq_network
+networks:
+  rabbitmq_network:
+    driver: bridge

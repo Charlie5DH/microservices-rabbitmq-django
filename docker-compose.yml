@@ -1,0 +1,100 @@
+version: "3.9"
+
+services:
+  ms_django:
+    container_name: ms_django
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    command: "python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - 8000:8000
+    volumes:
+      - ./admin:/app
+    networks:
+      - rabbitmq_network
+    depends_on:
+      - ms_django_mysql
+      - rabbitmq
+
+  ms_django_mysql:
+    image: mysql:5.7
+    container_name: ms_django_mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: "ms_django"
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "root"
+    volumes:
+      - ./admin/db/data:/var/lib/mysql
+    ports:
+      - 3306:3306
+    networks:
+      - rabbitmq_network
+
+  rabbitmq:
+    image: "rabbitmq:3.8-management-alpine"
+    container_name: "rabbitmq_container"
+    environment:
+      - RABBITMQ_DEFAULT_USER=root
+      - RABBITMQ_DEFAULT_PASS=root
+      - RABBITMQ_USERNAME=admin
+      - RABBITMQ_PASSWORD=admin
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ./messages/docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ./messages/docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - rabbitmq_network
+
+  ms_django_2_mysql:
+    image: mysql:5.7
+    container_name: ms_django_2_mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: "ms_django"
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "root"
+    volumes:
+      - ./service/db/data:/var/lib/mysql
+    ports:
+      - 3307:3306 # son no conflict with ms_django_mysql
+    networks:
+      - rabbitmq_network
+
+  ms_django_2:
+    container_name: ms_django_2
+    build:
+      context: ./service
+      dockerfile: Dockerfile
+    command: "python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - 8001:8000
+    volumes:
+      - ./service:/app
+    networks:
+      - rabbitmq_network
+    depends_on:
+      - ms_django_2_mysql
+      - rabbitmq
+
+  queue:
+    build:
+      context: ./service
+      dockerfile: Dockerfile
+    container_name: ms_django_2_queue
+    command: "python consumer.py"
+    depends_on:
+      - ms_django_2
+      - ms_django_2_mysql
+      - rabbitmq
+    networks:
+      - rabbitmq_network
+
+networks:
+  rabbitmq_network:
+    driver: bridge
